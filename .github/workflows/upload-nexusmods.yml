@@ -24,7 +24,8 @@ jobs:
           gh release download "$TAG" --pattern "${{ github.event.repository.name }}.zip" --dir dist
           ls dist/
 
-      - uses: Nexus-Mods/upload-action@v2
+      # Pinned to the latest available tag (v1.0.0-beta.10); there is no "v2" tag
+      - uses: Nexus-Mods/upload-action@v1.0.0-beta.10
         with:
           api_key: ${{ secrets.NEXUS_API_KEY }}
           file_id: ${{ vars.NEXUS_MODS_FILE_ID }}
