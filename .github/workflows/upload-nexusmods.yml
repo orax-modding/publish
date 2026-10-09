@@ -28,8 +28,8 @@ jobs:
       # Pinned to the latest available tag (v1.0.0-beta.10); there is no "v2" tag
       - uses: Nexus-Mods/upload-action@v1.0.0-beta.10
         with:
-          api_key: ${{ secrets.NEXUS_API_KEY }}
-          file_id: ${{ vars.NEXUS_MODS_FILE_ID }}
+          api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+          file_id: ${{ vars.NEXUSMODS_FILE_ID }}
           filename: dist/${{ github.event.repository.name }}.zip
           version: ${{ github.event.release.tag_name }}
-          mod_id: ${{ vars.NEXUS_MODS_MOD_ID }}
+          mod_id: ${{ vars.NEXUSMODS_MOD_ID }}
