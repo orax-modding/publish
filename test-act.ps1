@@ -25,6 +25,12 @@
     Passes -n/--dryrun to act so the workflow is validated without
     being executed in a container.
 
+.PARAMETER Image
+    Docker image used to run the "ubuntu-latest" job locally. Defaults to
+    ghcr.io/catthehacker/ubuntu:gh-latest because it ships the gh CLI,
+    which the workflow needs for "gh release download" (the default act
+    image does not include gh).
+
 .EXAMPLE
     .\test-act.ps1 -Tag v0.1.0
     Runs the publication workflow with the tag v0.1.0.
@@ -39,7 +45,10 @@ param(
     [string]$Tag = "v0.1.0",
 
     [Parameter(Mandatory = $false)]
-    [switch]$DryRun
+    [switch]$DryRun,
+
+    [Parameter(Mandatory = $false)]
+    [string]$Image = "ghcr.io/catthehacker/ubuntu:gh-latest"
 )
 
 # Repository path (script directory, current directory as fallback)
@@ -117,7 +126,7 @@ if (-not $NexusApiKey) {
 
 # Build the act command arguments
 # (act flags: -C working directory, -W workflow file, -e event file, -j job,
-#  -n dry run, --var repository variable, -s secret)
+#  -n dry run, -P platform image, --var repository variable, -s secret)
 $WorkflowFile = Join-Path $RepoRoot ".github\workflows\upload-nexusmods.yml"
 $ActArgs = @(
     "release"
@@ -126,6 +135,11 @@ $ActArgs = @(
     "-e", $EventFile
     "-j", "upload"
 )
+# Map the "ubuntu-latest" runner to an image that ships the gh CLI, which the
+# workflow needs for "gh release download" (the default act image lacks gh)
+if ($Image) {
+    $ActArgs += @("-P", "ubuntu-latest=$Image")
+}
 if ($DryRun) {
     $ActArgs += "-n"
 }
