@@ -15,8 +15,12 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
 
+      # fetch-depth: 0 is required so the changelog script can walk the full
+      # history and resolve the previous release tag
       - name: Checkout
         uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
 
       - name: Download release asset
         env:
@@ -24,6 +28,12 @@ jobs:
         run: |
           gh release download "$TAG" --pattern "${{ github.event.repository.name }}.zip" --dir dist
           ls dist/
+
+      - name: Generate changelog
+        id: changelog
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: bash .github/scripts/generate-changelog.sh
 
       # Pinned to the latest available tag (v1.0.0-beta.10); there is no "v2" tag
       - uses: Nexus-Mods/upload-action@v1.0.0-beta.10
@@ -33,3 +43,6 @@ jobs:
           filename: dist/${{ github.event.repository.name }}.zip
           version: ${{ github.event.release.tag_name }}
           mod_id: ${{ vars.NEXUSMODS_MOD_ID }}
+          display_name: dist/${{ github.event.repository.name }}
+          update_mod_version: true
+          changelog: ${{ steps.changelog.outputs.changelog }}
