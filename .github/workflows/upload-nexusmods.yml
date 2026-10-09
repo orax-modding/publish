@@ -1,0 +1,33 @@
+name: Upload to Nexus Mods
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    env:
+      # Needed by "gh release download" (GitHub runners also read GITHUB_TOKEN)
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - name: Download release asset
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          gh release download "$TAG" --pattern "${{ github.event.repository.name }}.zip" --dir dist
+          ls dist/
+
+      - uses: Nexus-Mods/upload-action@v2
+        with:
+          api_key: ${{ secrets.NEXUS_API_KEY }}
+          file_id: ${{ vars.NEXUS_MODS_FILE_ID }}
+          filename: dist/${{ github.event.repository.name }}.zip
+          version: ${{ github.event.release.tag_name }}
+          mod_id: ${{ vars.NEXUS_MODS_MOD_ID }}
