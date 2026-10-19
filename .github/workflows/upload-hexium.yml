@@ -19,7 +19,10 @@ jobs:
     env:
       # Needed by "gh release download" (GitHub runners also read GITHUB_TOKEN).
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      TCLI_AUTH_TOKEN: ${{ secrets.HEXIUM_TCLI_AUTH_TOKEN }}
+      # Hexium team API token (team settings page -> "create a new API token").
+      HEXIUM_TCLI_AUTH_TOKEN: ${{ secrets.HEXIUM_TCLI_AUTH_TOKEN }}
+      # Publishing namespace; override with the HEXIUM_TEAM repository variable.
+      HEXIUM_TEAM: ${{ vars.HEXIUM_TEAM || 'orax' }}
       # workflow_dispatch input when run manually, release tag otherwise.
       TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
 
@@ -27,20 +30,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7.0.1
 
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          # tcli 0.2.4 targets .NET 6 (required); 10.x kept available as well.
-          dotnet-version: |
-            6.0.x
-            10.x
-
       - name: Download release asset
         run: |
           gh release download "$TAG" --pattern "${{ github.event.repository.name }}.zip" --dir dist
           ls dist/
 
+      # Python 3 is preinstalled on the runner; publish-hexium.py is stdlib only.
       - name: Publish to Hexium
-        run: |
-          dotnet tool restore
-          dotnet tcli publish --config-path hexium.toml --file "dist/${{ github.event.repository.name }}.zip"
+        run: python3 publish-hexium.py "dist/${{ github.event.repository.name }}.zip"
