@@ -1,0 +1,12 @@
+[config]
+schemaVersion = "0.0.1"
+
+[general]
+repository = "https://hexium.gg"
+
+[publish]
+communities = ["valheim"]
+
+[publish.categories]
+# https://valheim.hexium.gg/api/experimental/community/valheim/category/
+valheim = ["Open Source", "Valheim 1.0"]

@@ -1,0 +1,39 @@
+name: Upload to Hexium.gg
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    env:
+      # Needed by "gh release download" (GitHub runners also read GITHUB_TOKEN).
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TCLI_AUTH_TOKEN: ${{ secrets.HEXIUM_TCLI_AUTH_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7.0.1
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Download release asset
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          gh release download "$TAG" --pattern "${{ github.event.repository.name }}.zip" --dir dist
+          ls dist/
+
+      - name: Publish to Hexium
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          dotnet tool restore
+          dotnet tcli publish --config-path hexium.toml --file "dist/${{ github.event.repository.name }}.zip"
