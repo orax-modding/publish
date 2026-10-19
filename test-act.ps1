@@ -15,6 +15,9 @@
       - NEXUS_MODS_FILE_ID (variable) file ID to upload the new version to
       - NEXUS_API_KEY      (secret)   Nexus Mods API key
 
+    Hexium configuration used by the workflow:
+      - HEXIUM_TCLI_AUTH_TOKEN (secret) Hexium/Thunderstore CLI auth token
+
     Each value is read from the environment variable of the same name
     when it is already set; otherwise the script prompts for it.
 
@@ -24,6 +27,10 @@
 .PARAMETER DryRun
     Passes -n/--dryrun to act so the workflow is validated without
     being executed in a container.
+
+.PARAMETER Platform
+    Platform to test: "nexus" (default) or "hexium". Selects the
+    corresponding workflow file under .github/workflows/.
 
 .PARAMETER Image
     Docker image used to run the "ubuntu-latest" job locally. Defaults to
@@ -38,11 +45,23 @@
 .EXAMPLE
     .\test-act.ps1 -DryRun
     Validates the workflow without executing it.
+
+.EXAMPLE
+    .\test-act.ps1 -Platform hexium -Tag v0.1.0
+    Runs the Hexium publication workflow with the tag v0.1.0.
+
+.EXAMPLE
+    .\test-act.ps1 -Platform hexium -DryRun
+    Validates the Hexium workflow without executing it.
 #>
 
 param(
     [Parameter(Mandatory = $false)]
     [string]$Tag = "v0.1.0",
+
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("nexus", "hexium")]
+    [string]$Platform = "nexus",
 
     [Parameter(Mandatory = $false)]
     [switch]$DryRun,
@@ -111,23 +130,60 @@ else {
 
 # Secrets and variables to pass to act (environment variables are reused
 # when they are already set, the prompt is only used as a fallback)
-$NexusModId = $env:NEXUS_MODS_MOD_ID
-if (-not $NexusModId) {
-    $NexusModId = Read-Host "Enter NEXUS_MODS_MOD_ID (or leave empty)"
+# Values can also be stored in a local .env file (ignored by git).
+function Get-DotEnvValue {
+    param([string]$Key)
+    $envFile = Join-Path $RepoRoot ".env"
+    if (-not (Test-Path $envFile)) { return $null }
+    Get-Content -Path $envFile | ForEach-Object {
+        $line = $_.Trim()
+        if ($line -match "^([^=]+)=(.*)$") {
+            $envKey = $Matches[1].Trim()
+            $envValue = $Matches[2].Trim().Trim('"').Trim("'")
+            if ($envKey -eq $Key) { return $envValue }
+        }
+    }
+    return $null
 }
-$NexusFileId = $env:NEXUS_MODS_FILE_ID
-if (-not $NexusFileId) {
-    $NexusFileId = Read-Host "Enter NEXUS_MODS_FILE_ID (or leave empty)"
+
+if ($Platform -eq "hexium") {
+    $WorkflowFile = Join-Path $RepoRoot ".github\workflows\upload-hexium.yml"
+    $HexiumToken = $env:HEXIUM_TCLI_AUTH_TOKEN
+    if (-not $HexiumToken) {
+        $HexiumToken = Get-DotEnvValue -Key "HEXIUM_TCLI_AUTH_TOKEN"
+    }
+    if (-not $HexiumToken) {
+        $HexiumToken = Read-Host "Enter HEXIUM_TCLI_AUTH_TOKEN (or leave empty)"
+    }
 }
-$NexusApiKey = $env:NEXUS_API_KEY
-if (-not $NexusApiKey) {
-    $NexusApiKey = Read-Host "Enter NEXUS_API_KEY (or leave empty)"
+else {
+    $WorkflowFile = Join-Path $RepoRoot ".github\workflows\upload-nexusmods.yml"
+    $NexusModId = $env:NEXUS_MODS_MOD_ID
+    if (-not $NexusModId) {
+        $NexusModId = Get-DotEnvValue -Key "NEXUS_MODS_MOD_ID"
+    }
+    if (-not $NexusModId) {
+        $NexusModId = Read-Host "Enter NEXUS_MODS_MOD_ID (or leave empty)"
+    }
+    $NexusFileId = $env:NEXUS_MODS_FILE_ID
+    if (-not $NexusFileId) {
+        $NexusFileId = Get-DotEnvValue -Key "NEXUS_MODS_FILE_ID"
+    }
+    if (-not $NexusFileId) {
+        $NexusFileId = Read-Host "Enter NEXUS_MODS_FILE_ID (or leave empty)"
+    }
+    $NexusApiKey = $env:NEXUS_API_KEY
+    if (-not $NexusApiKey) {
+        $NexusApiKey = Get-DotEnvValue -Key "NEXUS_API_KEY"
+    }
+    if (-not $NexusApiKey) {
+        $NexusApiKey = Read-Host "Enter NEXUS_API_KEY (or leave empty)"
+    }
 }
 
 # Build the act command arguments
 # (act flags: -C working directory, -W workflow file, -e event file, -j job,
 #  -n dry run, -P platform image, --var repository variable, -s secret)
-$WorkflowFile = Join-Path $RepoRoot ".github\workflows\upload-nexusmods.yml"
 $ActArgs = @(
     "release"
     "-C", $RepoRoot
@@ -143,14 +199,21 @@ if ($Image) {
 if ($DryRun) {
     $ActArgs += "-n"
 }
-if ($NexusModId) {
-    $ActArgs += @("--var", "NEXUS_MODS_MOD_ID=$NexusModId")
+if ($Platform -eq "hexium") {
+    if ($HexiumToken) {
+        $ActArgs += @("--secret", "HEXIUM_TCLI_AUTH_TOKEN=$HexiumToken")
+    }
 }
-if ($NexusFileId) {
-    $ActArgs += @("--var", "NEXUS_MODS_FILE_ID=$NexusFileId")
-}
-if ($NexusApiKey) {
-    $ActArgs += @("--secret", "NEXUS_API_KEY=$NexusApiKey")
+else {
+    if ($NexusModId) {
+        $ActArgs += @("--var", "NEXUS_MODS_MOD_ID=$NexusModId")
+    }
+    if ($NexusFileId) {
+        $ActArgs += @("--var", "NEXUS_MODS_FILE_ID=$NexusFileId")
+    }
+    if ($NexusApiKey) {
+        $ActArgs += @("--secret", "NEXUS_API_KEY=$NexusApiKey")
+    }
 }
 # Forward GITHUB_TOKEN when available (needed by "gh release download")
 if ($env:GITHUB_TOKEN) {
@@ -160,6 +223,7 @@ if ($env:GITHUB_TOKEN) {
 # Display the command with the secret values masked
 $DisplayArgs = $ActArgs | ForEach-Object {
     if ($_ -like "NEXUS_API_KEY=*") { "NEXUS_API_KEY=***" }
+    elseif ($_ -like "HEXIUM_TCLI_AUTH_TOKEN=*") { "HEXIUM_TCLI_AUTH_TOKEN=***" }
     elseif ($_ -like "GITHUB_TOKEN=*") { "GITHUB_TOKEN=***" }
     else { $_ }
 }
