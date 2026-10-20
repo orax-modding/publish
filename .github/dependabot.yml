@@ -1,0 +1,11 @@
+# Keeps the external actions used by the pipelines up to date
+# (actions/checkout, Nexus-Mods/upload-action, ...). The local callers use
+# ./.github/... paths and the script is fetched by ref, so those are not
+# tracked here; consumer repos track this repo's reusable workflow tags with
+# their own dependabot.yml.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
