@@ -76,8 +76,7 @@ jobs:
             echo "CHANGELOG_EOF"
           } >> "$GITHUB_OUTPUT"
 
-      # Pinned to the latest available tag (v1.0.0-beta.10); there is no "v2" tag.
-      - uses: Nexus-Mods/upload-action@v1.0.0-beta.10
+      - uses: Nexus-Mods/upload-action@v1.0.0-beta.11
         with:
           api_key: ${{ secrets.NEXUSMODS_API_KEY }}
           file_id: ${{ inputs.file_id }}
