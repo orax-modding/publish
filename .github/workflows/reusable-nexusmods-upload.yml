@@ -1,6 +1,6 @@
 # Reusable workflow: publish a release to Nexus Mods.
 #
-# Other repos only call this file (see REUSING.md) and provide
+# Other repos only call this file (see README.md) and provide
 # NEXUSMODS_MOD_ID / NEXUSMODS_FILE_ID (repository variables, unique per mod)
 # plus NEXUSMODS_API_KEY (secret, best kept at the organization level).
 name: Nexus Mods upload (reusable)

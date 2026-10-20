@@ -2,7 +2,7 @@
 #
 # Single source of the logic (publish-hexium.py included, fetched from
 # orax-modding/publish): other repos only call this file,
-# see REUSING.md for the ~10-line caller template to copy.
+# see README.md for the ~10-line caller template to copy.
 name: Hexium upload (reusable)
 
 on:
