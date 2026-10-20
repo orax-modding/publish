@@ -1,0 +1,3 @@
+Start-Process pwsh -ArgumentList '-NoProfile', '-File', 'run-hexium-real.ps1' -WorkingDirectory 'A:\_MODDING\_orax-modding\publish' -RedirectStandardOutput 'A:\_MODDING\_orax-modding\publish\hexium-test-real.log' -RedirectStandardError 'A:\_MODDING\_orax-modding\publish\hexium-test-real-err.log'
+Write-Host "Test lance en arrière-plan avec le vrai token depuis .env"
+Write-Host "Logs : hexium-test-real.log et hexium-test-real-err.log"
