@@ -1,8 +1,8 @@
 name: Upload to Nexus Mods
 
-# Local caller: all the logic lives in nexusmods-upload.yml (the reusable
+# Local caller: all the logic lives in reusable-nexusmods-upload.yml (the reusable
 # workflow). In another repo, replace "uses: ./.github/…" with
-# "uses: orax-modding/publish/.github/workflows/nexusmods-upload.yml@v1"
+# "uses: orax-modding/publish/.github/workflows/reusable-nexusmods-upload.yml@v1"
 # (complete template in REUSING.md).
 on:
   release:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   upload:
-    uses: ./.github/workflows/nexusmods-upload.yml
+    uses: ./.github/workflows/reusable-nexusmods-upload.yml
     with:
       tag: ${{ github.event.release.tag_name }}
       mod_id: ${{ vars.NEXUSMODS_MOD_ID }}

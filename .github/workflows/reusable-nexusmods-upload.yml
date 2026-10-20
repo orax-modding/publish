@@ -3,7 +3,7 @@
 # Other repos only call this file (see REUSING.md) and provide
 # NEXUSMODS_MOD_ID / NEXUSMODS_FILE_ID (repository variables, unique per mod)
 # plus NEXUSMODS_API_KEY (secret, best kept at the organization level).
-name: Nexus Mods upload
+name: Nexus Mods upload (reusable)
 
 on:
   workflow_call:

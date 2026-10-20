@@ -4,8 +4,8 @@ This repo is the **single source of truth** for two publishing pipelines:
 
 | file (here) | role |
 |---|---|
-| `.github/workflows/hexium-upload.yml` | **reusable** workflow: the whole Hexium pipeline + `publish-hexium.py` |
-| `.github/workflows/nexusmods-upload.yml` | **reusable** workflow: the whole Nexus Mods pipeline |
+| `.github/workflows/reusable-hexium-upload.yml` | **reusable** workflow: the whole Hexium pipeline + `publish-hexium.py` |
+| `.github/workflows/reusable-nexusmods-upload.yml` | **reusable** workflow: the whole Nexus Mods pipeline |
 | `publish-hexium.py` | the script (always executed from *this* repo, never copied) |
 | `.github/workflows/upload-hexium.yml` | local caller (this repo) |
 | `.github/workflows/upload-nexusmods.yml` | local caller (this repo) |
@@ -40,7 +40,7 @@ permissions:
 
 jobs:
   upload:
-    uses: orax-modding/publish/.github/workflows/hexium-upload.yml@v1
+    uses: orax-modding/publish/.github/workflows/reusable-hexium-upload.yml@v1
     with:
       tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
       # team: my-namespace       # optional; falls back to [package] namespace in hexium.toml
@@ -88,7 +88,7 @@ permissions:
 
 jobs:
   upload:
-    uses: orax-modding/publish/.github/workflows/nexusmods-upload.yml@v1
+    uses: orax-modding/publish/.github/workflows/reusable-nexusmods-upload.yml@v1
     with:
       tag: ${{ github.event.release.tag_name }}
       mod_id: ${{ vars.NEXUSMODS_MOD_ID }}

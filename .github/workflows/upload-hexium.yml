@@ -1,8 +1,8 @@
 name: Upload to Hexium.gg
 
-# Local caller: all the logic lives in hexium-upload.yml (the reusable
+# Local caller: all the logic lives in reusable-hexium-upload.yml (the reusable
 # workflow). In another repo, replace "uses: ./.github/…" with
-# "uses: orax-modding/publish/.github/workflows/hexium-upload.yml@v1"
+# "uses: orax-modding/publish/.github/workflows/reusable-hexium-upload.yml@v1"
 # (complete template in REUSING.md).
 on:
   release:
@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   upload:
-    uses: ./.github/workflows/hexium-upload.yml
+    uses: ./.github/workflows/reusable-hexium-upload.yml
     with:
       # workflow_dispatch input when run manually, release tag otherwise.
       tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
