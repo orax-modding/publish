@@ -1,5 +1,9 @@
 name: Upload to Nexus Mods
 
+# Appelant local : toute la logique vit dans nexusmods-upload.yml (workflow
+# réutilisable). Dans un autre dépôt, remplacez "uses: ./.github/…" par
+# "uses: orax-modding/publish/.github/workflows/nexusmods-upload.yml@v1"
+# (modèle complet dans REUTILISATION.md).
 on:
   release:
     types: [published]
@@ -9,40 +13,9 @@ permissions:
 
 jobs:
   upload:
-    runs-on: ubuntu-latest
-    env:
-      # Needed by "gh release download" (GitHub runners also read GITHUB_TOKEN)
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    steps:
-
-      # fetch-depth: 0 is required so the changelog script can walk the full
-      # history and resolve the previous release tag
-      - name: Checkout
-        uses: actions/checkout@v7.0.1
-        with:
-          fetch-depth: 0
-
-      - name: Download release asset
-        env:
-          TAG: ${{ github.event.release.tag_name }}
-        run: |
-          gh release download "$TAG" --pattern "${{ github.event.repository.name }}.zip" --dir dist
-          ls dist/
-
-      - name: Generate changelog
-        id: changelog
-        env:
-          TAG: ${{ github.event.release.tag_name }}
-        run: bash .github/scripts/generate-changelog.sh
-
-      # Pinned to the latest available tag (v1.0.0-beta.10); there is no "v2" tag
-      - uses: Nexus-Mods/upload-action@v1.0.0-beta.10
-        with:
-          api_key: ${{ secrets.NEXUSMODS_API_KEY }}
-          file_id: ${{ vars.NEXUSMODS_FILE_ID }}
-          filename: dist/${{ github.event.repository.name }}.zip
-          version: ${{ github.event.release.tag_name }}
-          mod_id: ${{ vars.NEXUSMODS_MOD_ID }}
-          display_name: dist/${{ github.event.repository.name }}
-          update_mod_version: true
-          changelog: ${{ steps.changelog.outputs.changelog }}
+    uses: ./.github/workflows/nexusmods-upload.yml
+    with:
+      tag: ${{ github.event.release.tag_name }}
+      mod_id: ${{ vars.NEXUSMODS_MOD_ID }}
+      file_id: ${{ vars.NEXUSMODS_FILE_ID }}
+    secrets: inherit

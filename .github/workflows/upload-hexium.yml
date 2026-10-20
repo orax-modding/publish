@@ -1,5 +1,9 @@
 name: Upload to Hexium.gg
 
+# Appelant local : toute la logique vit dans hexium-upload.yml (workflow
+# réutilisable). Dans un autre dépôt, remplacez "uses: ./.github/…" par
+# "uses: orax-modding/publish/.github/workflows/hexium-upload.yml@v1"
+# (modèle complet dans REUTILISATION.md).
 on:
   release:
     types: [published]
@@ -15,26 +19,10 @@ permissions:
 
 jobs:
   upload:
-    runs-on: ubuntu-latest
-    env:
-      # Needed by "gh release download" (GitHub runners also read GITHUB_TOKEN).
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Hexium team API token (team settings page -> "create a new API token").
-      HEXIUM_TCLI_AUTH_TOKEN: ${{ secrets.HEXIUM_TCLI_AUTH_TOKEN }}
-      # Publishing namespace; override with the HEXIUM_TEAM repository variable.
-      HEXIUM_TEAM: ${{ vars.HEXIUM_TEAM || 'orax' }}
+    uses: ./.github/workflows/hexium-upload.yml
+    with:
       # workflow_dispatch input when run manually, release tag otherwise.
-      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7.0.1
-
-      - name: Download release asset
-        run: |
-          gh release download "$TAG" --pattern "${{ github.event.repository.name }}.zip" --dir dist
-          ls dist/
-
-      # Python 3 is preinstalled on the runner; publish-hexium.py is stdlib only.
-      - name: Publish to Hexium
-        run: python3 publish-hexium.py "dist/${{ github.event.repository.name }}.zip"
+      tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+      # Namespace Hexium ; vide = [package] namespace de hexium.toml.
+      team: ${{ vars.HEXIUM_TEAM }}
+    secrets: inherit

@@ -1,0 +1,71 @@
+# Workflow réutilisable : publication d'une release sur Hexium.gg.
+#
+# Source unique de la logique (dont publish-hexium.py, récupéré depuis
+# orax-modding/publish) : les autres dépôts n'ont qu'à appeler ce fichier,
+# voir REUTILISATION.md pour le modèle à copier (une dizaine de lignes).
+name: Hexium upload
+
+on:
+  workflow_call:
+    inputs:
+      asset:
+        description: "Zip à publier ; vide = <nom-du-repo>.zip"
+        type: string
+        default: ""
+      tag:
+        description: "Tag à publier ; vide = release qui a déclenché l'appel"
+        type: string
+        default: ""
+      team:
+        description: "Namespace Hexium (author_name) ; vide = [package] namespace de hexium.toml"
+        type: string
+        default: ""
+      config:
+        description: "Config lue par publish-hexium.py ; vide = hexium.toml si présent"
+        type: string
+        default: ""
+      tools_ref:
+        description: "Ref d'orax-modding/publish qui porte publish-hexium.py (à garder égale à la ref d'appel)"
+        type: string
+        default: "v1"
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Hérité de l'appelant via secrets: inherit — token d'équipe Hexium
+      # (team settings -> "create a new API token").
+      HEXIUM_TCLI_AUTH_TOKEN: ${{ secrets.HEXIUM_TCLI_AUTH_TOKEN }}
+      HEXIUM_TEAM: ${{ inputs.team }}
+      TAG: ${{ inputs.tag || github.event.release.tag_name }}
+      ASSET: ${{ inputs.asset || format('{0}.zip', github.event.repository.name) }}
+
+    steps:
+      - name: Checkout du projet appelant
+        uses: actions/checkout@v7.0.1
+
+      - name: Checkout d'orax-modding/publish (publish-hexium.py)
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: orax-modding/publish
+          ref: ${{ inputs.tools_ref }}
+          path: .publish-tools
+
+      - name: Download release asset
+        run: |
+          gh release download "$TAG" --pattern "$ASSET" --dir dist
+          ls dist/
+
+      # Python 3 est préinstallé sur le runner ; le script n'utilise que la
+      # bibliothèque standard et lit hexium.toml du projet appelant.
+      - name: Publish to Hexium
+        env:
+          CONFIG: ${{ inputs.config }}
+        run: |
+          args=()
+          [ -z "$CONFIG" ] || args+=(--config "$CONFIG")
+          python3 .publish-tools/publish-hexium.py "dist/$ASSET" "${args[@]}"

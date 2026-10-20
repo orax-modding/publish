@@ -1,0 +1,89 @@
+# Workflow réutilisable : publication d'une release sur Nexus Mods.
+#
+# Les autres dépôts n'ont qu'à appeler ce fichier (voir REUTILISATION.md) en
+# fournissant NEXUSMODS_MOD_ID / NEXUSMODS_FILE_ID (variables de dépôt, uniques
+# par mod) et NEXUSMODS_API_KEY (secret, idéalement au niveau organisation).
+name: Nexus Mods upload
+
+on:
+  workflow_call:
+    inputs:
+      asset:
+        description: "Zip à publier ; vide = <nom-du-repo>.zip"
+        type: string
+        default: ""
+      tag:
+        description: "Tag à publier ; vide = release qui a déclenché l'appel"
+        type: string
+        default: ""
+      mod_id:
+        description: "ID du mod sur Nexus Mods (NEXUSMODS_MOD_ID)"
+        type: string
+        required: true
+      file_id:
+        description: "ID du fichier maître sur Nexus Mods (NEXUSMODS_FILE_ID)"
+        type: string
+        required: true
+      display_name:
+        description: "Nom affiché sur Nexus ; vide = dist/<nom-du-repo>"
+        type: string
+        default: ""
+      update_mod_version:
+        description: "Créer/mettre à jour la version du mod à chaque release"
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      TAG: ${{ inputs.tag || github.event.release.tag_name }}
+      ASSET: ${{ inputs.asset || format('{0}.zip', github.event.repository.name) }}
+      MOD_ID: ${{ inputs.mod_id }}
+      FILE_ID: ${{ inputs.file_id }}
+
+    steps:
+      - name: Checkout du projet appelant
+        uses: actions/checkout@v7.0.1
+
+      - name: Vérification de la configuration
+        run: |
+          missing=""
+          [ -n "$MOD_ID" ]  || missing="$missing NEXUSMODS_MOD_ID"
+          [ -n "$FILE_ID" ] || missing="$missing NEXUSMODS_FILE_ID"
+          if [ -n "$missing" ]; then
+            echo "::error::Variable(s) de dépôt manquante(s):$missing (Settings > Secrets and variables > Actions)"
+            exit 1
+          fi
+
+      - name: Download release asset
+        run: |
+          gh release download "$TAG" --pattern "$ASSET" --dir dist
+          ls dist/
+
+      - name: Get changelog
+        id: changelog
+        run: |
+          #TODO: formatage spécifique Nexus si besoin. Par défaut on envoie le
+          # corps de la release du tag, déjà rédigé à la création de la release.
+          {
+            echo "changelog<<CHANGELOG_EOF"
+            gh release view "$TAG" --json body -q '.body // ""'
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      # Pinned to the latest available tag (v1.0.0-beta.10); there is no "v2" tag.
+      - uses: Nexus-Mods/upload-action@v1.0.0-beta.10
+        with:
+          api_key: ${{ secrets.NEXUSMODS_API_KEY }}
+          file_id: ${{ inputs.file_id }}
+          filename: dist/${{ inputs.asset || format('{0}.zip', github.event.repository.name) }}
+          version: ${{ inputs.tag || github.event.release.tag_name }}
+          mod_id: ${{ inputs.mod_id }}
+          display_name: ${{ inputs.display_name || format('dist/{0}', github.event.repository.name) }}
+          update_mod_version: ${{ inputs.update_mod_version }}
+          changelog: ${{ steps.changelog.outputs.changelog }}

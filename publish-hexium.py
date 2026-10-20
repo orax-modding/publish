@@ -4,7 +4,7 @@
 Hexium implements Thunderstore's experimental submission API, so the flow is the one
 Thunderstore's own CLI (tcli 0.2.4) uses, endpoint for endpoint:
 
-    1. POST /api/experimental/usermedia/initiate-upload/        -> uuid + presigned part URLs
+    1. POST /api/experimental/usermedia/initiate-upload/         -> uuid + presigned part URLs
     2. PUT  <presigned url> once per part                        -> the bytes (with Content-MD5)
     3. POST /api/experimental/usermedia/{uuid}/finish-upload/    -> marks the upload complete
     4. POST /api/experimental/submission/submit/                 -> the version goes live
@@ -17,7 +17,7 @@ Standard library only (Python 3.11+ for tomllib), so it runs on a CI box untouch
 
 Usage:
     HEXIUM_TCLI_AUTH_TOKEN=... python publish-hexium.py dist/publish.zip
-    python publish-hexium.py dist/publish.zip --team orax --categories "Open Source,Valheim 1.0"
+    python publish-hexium.py dist/publish.zip --team YOUR_TEAM --categories "Open Source,Valheim 1.0"
     python publish-hexium.py dist/publish.zip --check-only   # no token, no upload
     python publish-hexium.py dist/publish.zip --dry-run      # full upload, then abort
 
