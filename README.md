@@ -46,7 +46,7 @@ permissions:
 
 jobs:
   upload:
-    uses: orax-modding/publish/.github/workflows/reusable-hexium-upload.yml@v1
+    uses: orax-modding/publish/.github/workflows/reusable-hexium-upload.yml@v0.1
     with:
       tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
       # team: my-namespace       # optional; falls back to [package] namespace in hexium.toml
@@ -94,7 +94,7 @@ permissions:
 
 jobs:
   upload:
-    uses: orax-modding/publish/.github/workflows/reusable-nexusmods-upload.yml@v1
+    uses: orax-modding/publish/.github/workflows/reusable-nexusmods-upload.yml@v0.1
     with:
       tag: ${{ github.event.release.tag_name }}
       mod_id: ${{ vars.NEXUSMODS_MOD_ID }}
@@ -159,10 +159,25 @@ to the master workflow: nothing else to declare.
 
 ## 5. Versions and updates
 
-* Callers pin **`@v1`**; never use a floating ref or `@main`.
-* To evolve the logic: change the master workflow here, **bump the tag**
-  (`v2`), then update `@v1` → `@v2` in every caller (`tools_ref` also defaults
-  to `v1`: the same version as the one being called).
+* Tools versioning uses semver with **two tags per release**:
+
+  | tag | role |
+  |---|---|
+  | `v0.1.0` | precise release: immutable, for audit and rollback |
+  | `v0.1` | floating minor: what callers pin (`@v0.1`), moved onto the latest `v0.1.x` |
+
+* Callers pin **`@v0.1`** (or exactly `v0.1.0` during a staged migration);
+  never use a floating ref like `@main`.
+* To ship a change: create the precise tag (`v0.1.1`, or `v0.2.0` for a
+  breaking change), move `v0.1` onto it, then update `@v0.1` → `@v0.2` in every
+  caller (`tools_ref` also defaults to `v0.1`: the same version as the one
+  being called).
+* **Two tag families share this repo — never mix them:**
+  * `v0.0.x` = dummy **package** versions: published as **GitHub Releases**
+    carrying `publish.zip`, and they trigger the upload workflows;
+  * tool tags (`v0.1.0`, `v0.1`) = workflow versions: **plain `git tag` only,
+    never a GitHub Release** — otherwise the `release` trigger fires and the
+    run fails on the missing `publish.zip` asset.
 * Recommended automatic tracking, `.github/dependabot.yml` in every repo:
 
   ```yaml
@@ -190,5 +205,5 @@ to the master workflow: nothing else to declare.
 * `workflow_call` never triggers anything by itself: the caller carries the
   events (`release`, `workflow_dispatch`).
 * The script is fetched with `actions/checkout` from `orax-modding/publish`
-  with `ref: ${{ inputs.tools_ref }}` (default `v1`): each caller can pin a
+  with `ref: ${{ inputs.tools_ref }}` (default `v0.1`): each caller can pin a
   different version during a gradual migration.

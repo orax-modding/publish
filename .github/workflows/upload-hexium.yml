@@ -2,7 +2,7 @@ name: Upload to Hexium.gg
 
 # Local caller: all the logic lives in reusable-hexium-upload.yml (the reusable
 # workflow). In another repo, replace "uses: ./.github/…" with
-# "uses: orax-modding/publish/.github/workflows/reusable-hexium-upload.yml@v1"
+# "uses: orax-modding/publish/.github/workflows/reusable-hexium-upload.yml@v0.1"
 # (complete template in README.md).
 on:
   release:

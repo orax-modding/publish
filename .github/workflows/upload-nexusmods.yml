@@ -2,7 +2,7 @@ name: Upload to Nexus Mods
 
 # Local caller: all the logic lives in reusable-nexusmods-upload.yml (the reusable
 # workflow). In another repo, replace "uses: ./.github/…" with
-# "uses: orax-modding/publish/.github/workflows/reusable-nexusmods-upload.yml@v1"
+# "uses: orax-modding/publish/.github/workflows/reusable-nexusmods-upload.yml@v0.1"
 # (complete template in README.md).
 on:
   release:

@@ -27,7 +27,7 @@ on:
       tools_ref:
         description: "Ref of orax-modding/publish carrying publish-hexium.py (keep equal to the calling ref)"
         type: string
-        default: "v1"
+        default: "v0.1"
 
 permissions:
   contents: read
