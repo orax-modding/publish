@@ -3,3 +3,7 @@ events/
 .env
 .secrets
 .vars
+
+# Build artifacts and local logs
+dist/
+*.log
