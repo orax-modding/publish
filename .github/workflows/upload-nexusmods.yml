@@ -1,9 +1,9 @@
 name: Upload to Nexus Mods
 
-# Appelant local : toute la logique vit dans nexusmods-upload.yml (workflow
-# réutilisable). Dans un autre dépôt, remplacez "uses: ./.github/…" par
+# Local caller: all the logic lives in nexusmods-upload.yml (the reusable
+# workflow). In another repo, replace "uses: ./.github/…" with
 # "uses: orax-modding/publish/.github/workflows/nexusmods-upload.yml@v1"
-# (modèle complet dans REUTILISATION.md).
+# (complete template in REUSING.md).
 on:
   release:
     types: [published]

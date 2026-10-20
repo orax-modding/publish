@@ -1,35 +1,35 @@
-# Workflow réutilisable : publication d'une release sur Nexus Mods.
+# Reusable workflow: publish a release to Nexus Mods.
 #
-# Les autres dépôts n'ont qu'à appeler ce fichier (voir REUTILISATION.md) en
-# fournissant NEXUSMODS_MOD_ID / NEXUSMODS_FILE_ID (variables de dépôt, uniques
-# par mod) et NEXUSMODS_API_KEY (secret, idéalement au niveau organisation).
+# Other repos only call this file (see REUSING.md) and provide
+# NEXUSMODS_MOD_ID / NEXUSMODS_FILE_ID (repository variables, unique per mod)
+# plus NEXUSMODS_API_KEY (secret, best kept at the organization level).
 name: Nexus Mods upload
 
 on:
   workflow_call:
     inputs:
       asset:
-        description: "Zip à publier ; vide = <nom-du-repo>.zip"
+        description: "Zip to publish; empty = <repo-name>.zip"
         type: string
         default: ""
       tag:
-        description: "Tag à publier ; vide = release qui a déclenché l'appel"
+        description: "Tag to publish; empty = the release that triggered the call"
         type: string
         default: ""
       mod_id:
-        description: "ID du mod sur Nexus Mods (NEXUSMODS_MOD_ID)"
+        description: "Mod ID on Nexus Mods (NEXUSMODS_MOD_ID)"
         type: string
         required: true
       file_id:
-        description: "ID du fichier maître sur Nexus Mods (NEXUSMODS_FILE_ID)"
+        description: "Master file ID on Nexus Mods (NEXUSMODS_FILE_ID)"
         type: string
         required: true
       display_name:
-        description: "Nom affiché sur Nexus ; vide = dist/<nom-du-repo>"
+        description: "Name displayed on Nexus; empty = dist/<repo-name>"
         type: string
         default: ""
       update_mod_version:
-        description: "Créer/mettre à jour la version du mod à chaque release"
+        description: "Create/update the mod version on every release"
         type: boolean
         default: true
 
@@ -47,16 +47,16 @@ jobs:
       FILE_ID: ${{ inputs.file_id }}
 
     steps:
-      - name: Checkout du projet appelant
+      - name: Checkout the calling project
         uses: actions/checkout@v7.0.1
 
-      - name: Vérification de la configuration
+      - name: Check the configuration
         run: |
           missing=""
           [ -n "$MOD_ID" ]  || missing="$missing NEXUSMODS_MOD_ID"
           [ -n "$FILE_ID" ] || missing="$missing NEXUSMODS_FILE_ID"
           if [ -n "$missing" ]; then
-            echo "::error::Variable(s) de dépôt manquante(s):$missing (Settings > Secrets and variables > Actions)"
+            echo "::error::Missing repository variable(s):$missing (Settings > Secrets and variables > Actions)"
             exit 1
           fi
 
@@ -68,8 +68,8 @@ jobs:
       - name: Get changelog
         id: changelog
         run: |
-          #TODO: formatage spécifique Nexus si besoin. Par défaut on envoie le
-          # corps de la release du tag, déjà rédigé à la création de la release.
+          #TODO: Nexus-specific formatting if needed. By default this sends
+          # the body of the tag's release, written when the release was created.
           {
             echo "changelog<<CHANGELOG_EOF"
             gh release view "$TAG" --json body -q '.body // ""'

@@ -1,31 +1,31 @@
-# Workflow réutilisable : publication d'une release sur Hexium.gg.
+# Reusable workflow: publish a release to Hexium.gg.
 #
-# Source unique de la logique (dont publish-hexium.py, récupéré depuis
-# orax-modding/publish) : les autres dépôts n'ont qu'à appeler ce fichier,
-# voir REUTILISATION.md pour le modèle à copier (une dizaine de lignes).
+# Single source of the logic (publish-hexium.py included, fetched from
+# orax-modding/publish): other repos only call this file,
+# see REUSING.md for the ~10-line caller template to copy.
 name: Hexium upload
 
 on:
   workflow_call:
     inputs:
       asset:
-        description: "Zip à publier ; vide = <nom-du-repo>.zip"
+        description: "Zip to publish; empty = <repo-name>.zip"
         type: string
         default: ""
       tag:
-        description: "Tag à publier ; vide = release qui a déclenché l'appel"
+        description: "Tag to publish; empty = the release that triggered the call"
         type: string
         default: ""
       team:
-        description: "Namespace Hexium (author_name) ; vide = [package] namespace de hexium.toml"
+        description: "Hexium namespace (author_name); empty = [package] namespace from hexium.toml"
         type: string
         default: ""
       config:
-        description: "Config lue par publish-hexium.py ; vide = hexium.toml si présent"
+        description: "Config read by publish-hexium.py; empty = hexium.toml when present"
         type: string
         default: ""
       tools_ref:
-        description: "Ref d'orax-modding/publish qui porte publish-hexium.py (à garder égale à la ref d'appel)"
+        description: "Ref of orax-modding/publish carrying publish-hexium.py (keep equal to the calling ref)"
         type: string
         default: "v1"
 
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      # Hérité de l'appelant via secrets: inherit — token d'équipe Hexium
+      # Forwarded from the caller via secrets: inherit — Hexium team token
       # (team settings -> "create a new API token").
       HEXIUM_TCLI_AUTH_TOKEN: ${{ secrets.HEXIUM_TCLI_AUTH_TOKEN }}
       HEXIUM_TEAM: ${{ inputs.team }}
@@ -45,10 +45,10 @@ jobs:
       ASSET: ${{ inputs.asset || format('{0}.zip', github.event.repository.name) }}
 
     steps:
-      - name: Checkout du projet appelant
+      - name: Checkout the calling project
         uses: actions/checkout@v7.0.1
 
-      - name: Checkout d'orax-modding/publish (publish-hexium.py)
+      - name: Checkout orax-modding/publish (publish-hexium.py)
         uses: actions/checkout@v7.0.1
         with:
           repository: orax-modding/publish
@@ -60,8 +60,8 @@ jobs:
           gh release download "$TAG" --pattern "$ASSET" --dir dist
           ls dist/
 
-      # Python 3 est préinstallé sur le runner ; le script n'utilise que la
-      # bibliothèque standard et lit hexium.toml du projet appelant.
+      # Python 3 is preinstalled on the runner; the script is stdlib-only and
+      # reads hexium.toml from the calling project.
       - name: Publish to Hexium
         env:
           CONFIG: ${{ inputs.config }}
