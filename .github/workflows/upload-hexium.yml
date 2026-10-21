@@ -25,4 +25,5 @@ jobs:
       tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
       # Hexium namespace; empty = [package] namespace from hexium.toml.
       team: ${{ vars.HEXIUM_TEAM }}
-    secrets: inherit
+    secrets:
+      HEXIUM_API_TOKEN: ${{ secrets.HEXIUM_API_TOKEN }}

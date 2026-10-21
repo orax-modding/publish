@@ -53,7 +53,8 @@ jobs:
             # team: my-namespace       # optional; falls back to [package] namespace in hexium.toml
             # asset: my-mod.zip        # optional; defaults to <repo-name>.zip
             # config: hexium.toml      # optional; defaults to hexium.toml when present
-        secrets: inherit
+        secrets:
+            HEXIUM_API_TOKEN: ${{ secrets.HEXIUM_API_TOKEN }}
 ```
 
 ### 1.2 The `hexium.toml` file to create at the repo root
@@ -107,7 +108,8 @@ jobs:
             mod_id: ${{ vars.NEXUSMODS_MOD_ID }}
             file_id: ${{ vars.NEXUSMODS_FILE_ID }}
             # display_name: dist/my-mod # optional; defaults to dist/<repo-name>
-        secrets: inherit
+        secrets:
+            NEXUSMODS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
 ```
 
 ### 2.2 The variables to create in that repo
@@ -142,8 +144,10 @@ Precedence: **repository variable > organization variable**, so keep `NEXUSMODS_
 `NEXUSMODS_FILE_ID` at the repository level (every mod has its own) and the tokens at the
 organization level.
 
-In the callers, `secrets: inherit` forwards organization + repository secrets to the master
-workflow: nothing else to declare.
+Callers must forward the secret **by name** (the `secrets:` block in both examples above).
+`secrets: inherit` only propagates secrets between workflows of the **same organization**, while
+each consumer lives in its own organization: GitHub would then silently deliver an empty secret
+and the upload fails with "no API token found".
 
 ---
 
