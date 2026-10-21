@@ -88,6 +88,12 @@ name: Upload to Nexus Mods
 on:
     release:
         types: [published]
+    workflow_dispatch:
+        inputs:
+            tag:
+                description: 'Release tag to publish (e.g. v1.2.3)'
+                required: true
+                default: 'v1.2.3'
 
 permissions:
     contents: read
@@ -96,7 +102,8 @@ jobs:
     upload:
         uses: orax-modding/publish/.github/workflows/reusable-nexusmods-upload.yml@v0.1
         with:
-            tag: ${{ github.event.release.tag_name }}
+            # workflow_dispatch input when run manually, release tag otherwise.
+            tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
             mod_id: ${{ vars.NEXUSMODS_MOD_ID }}
             file_id: ${{ vars.NEXUSMODS_FILE_ID }}
             # display_name: dist/my-mod # optional; defaults to dist/<repo-name>
@@ -149,8 +156,10 @@ workflow: nothing else to declare.
 4. **Default branch**: the caller file must live on it (otherwise `release` triggers never fire).
 5. **Permissions**: keep `permissions: contents: read` in the caller (the ceiling passed down to the
    master workflow, required by `gh release download`).
-6. **Dry run before a real release**: _Actions → Upload to Hexium.gg → Run workflow_ with an
-   existing tag (the Hexium caller exposes that button).
+6. **Manual run / dry run**: _Actions → Upload to Hexium.gg_ or _Upload to Nexus Mods_ →
+   _Run workflow_ with an existing tag (both callers expose that button). This is also the way
+   to retry a failed upload after fixing the configuration — no release to re-publish. The tag
+   must point at a published release carrying the asset.
 
 ---
 

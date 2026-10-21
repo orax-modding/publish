@@ -7,6 +7,12 @@ name: Upload to Nexus Mods
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (e.g. v0.0.0)"
+        required: true
+        default: "v0.0.0"
 
 permissions:
   contents: read
@@ -15,7 +21,8 @@ jobs:
   upload:
     uses: ./.github/workflows/reusable-nexusmods-upload.yml
     with:
-      tag: ${{ github.event.release.tag_name }}
+      # workflow_dispatch input when run manually, release tag otherwise.
+      tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
       mod_id: ${{ vars.NEXUSMODS_MOD_ID }}
       file_id: ${{ vars.NEXUSMODS_FILE_ID }}
     secrets: inherit
