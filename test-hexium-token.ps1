@@ -4,8 +4,8 @@
 #   body: {"filename":"...","file_size_bytes":<long>}   (FileData model)
 #   expects: 201 Created
 $ErrorActionPreference = 'Stop'
-$line = Get-Content .env | Where-Object { $_ -match '^HEXIUM_TCLI_AUTH_TOKEN\s*=' } | Select-Object -First 1
-$token = ($line -replace '^HEXIUM_TCLI_AUTH_TOKEN\s*=\s*', '').Trim()
+$line = Get-Content .env | Where-Object { $_ -match '^HEXIUM_API_TOKEN\s*=' } | Select-Object -First 1
+$token = ($line -replace '^HEXIUM_API_TOKEN\s*=\s*', '').Trim()
 if (-not $token) { Write-Host 'Token missing in .env'; exit 1 }
 
 $uri = 'https://hexium.gg/api/experimental/usermedia/initiate-upload/'

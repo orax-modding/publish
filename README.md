@@ -131,11 +131,11 @@ No script and no `hexium.toml` to copy for Nexus-only projects. The changelog se
 
 | type     | key                      | scope                         |
 | -------- | ------------------------ | ----------------------------- |
-| secret   | `HEXIUM_TCLI_AUTH_TOKEN` | all repos (Hexium team token) |
+| secret   | `HEXIUM_API_TOKEN` | all repos (Hexium API token)  |
 | secret   | `NEXUSMODS_API_KEY`      | all repos                     |
 | variable | `HEXIUM_TEAM`            | all repos (same Hexium team)  |
 
-From the CLI: `gh secret set HEXIUM_TCLI_AUTH_TOKEN --org orax-modding` (needs the `admin:org`
+From the CLI: `gh secret set HEXIUM_API_TOKEN --org orax-modding` (needs the `admin:org`
 scope: `gh auth refresh -s admin:org`).
 
 Precedence: **repository variable > organization variable**, so keep `NEXUSMODS_MOD_ID` /
@@ -150,7 +150,7 @@ workflow: nothing else to declare.
 ## 4. Checklist for each new project
 
 1. **Zip name**: `<repo-name>.zip` is expected by default → otherwise pass the `asset:` input.
-2. **Hexium**: `hexium.toml` (namespace, communities, categories) + the `HEXIUM_TCLI_AUTH_TOKEN`
+2. **Hexium**: `hexium.toml` (namespace, communities, categories) + the `HEXIUM_API_TOKEN`
    secret available (organization).
 3. **Nexus**: `NEXUSMODS_MOD_ID` + `NEXUSMODS_FILE_ID` repository variables.
 4. **Default branch**: the caller file must live on it (otherwise `release` triggers never fire).

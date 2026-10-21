@@ -39,7 +39,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Forwarded from the caller via secrets: inherit — Hexium team token
       # (team settings -> "create a new API token").
-      HEXIUM_TCLI_AUTH_TOKEN: ${{ secrets.HEXIUM_TCLI_AUTH_TOKEN }}
+      HEXIUM_API_TOKEN: ${{ secrets.HEXIUM_API_TOKEN }}
       HEXIUM_TEAM: ${{ inputs.team }}
       TAG: ${{ inputs.tag || github.event.release.tag_name }}
       ASSET: ${{ inputs.asset || format('{0}.zip', github.event.repository.name) }}

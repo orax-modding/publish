@@ -16,13 +16,13 @@ per-community ones, `author_name` is the team/namespace the token belongs to.
 Standard library only (Python 3.11+ for tomllib), so it runs on a CI box untouched.
 
 Usage:
-    HEXIUM_TCLI_AUTH_TOKEN=... python publish-hexium.py dist/publish.zip
+    HEXIUM_API_TOKEN=... python publish-hexium.py dist/publish.zip
     python publish-hexium.py dist/publish.zip --team YOUR_TEAM --categories "Open Source,Valheim 1.0"
     python publish-hexium.py dist/publish.zip --check-only   # no token, no upload
     python publish-hexium.py dist/publish.zip --dry-run      # full upload, then abort
 
-Token lookup (first hit wins): HEXIUM_TOKEN, HEXIUM_TCLI_AUTH_TOKEN, TCLI_AUTH_TOKEN,
-then the same keys inside a local .env file. The token must be created on the Hexium
+Token lookup: HEXIUM_API_TOKEN from the environment, then the same key inside a local
+.env file. The token must be created on the Hexium
 team settings page (settings icon next to your username -> team management page ->
 "create a new API token" at the bottom); a user/session token is refused.
 """
@@ -47,11 +47,11 @@ except ModuleNotFoundError:  # Python < 3.11
     tomllib = None
 
 DEFAULT_REPOSITORY = "https://hexium.gg"
-TOKEN_ENV_VARS = ("HEXIUM_TOKEN", "HEXIUM_TCLI_AUTH_TOKEN", "TCLI_AUTH_TOKEN")
+TOKEN_ENV_VARS = ("HEXIUM_API_TOKEN",)
 TOKEN_HINT = (
     "create a fresh token on Hexium (sign in -> settings icon next to your username -> "
     "team management page -> 'create a new API token' at the bottom) and store it in the "
-    "HEXIUM_TCLI_AUTH_TOKEN secret"
+    "HEXIUM_API_TOKEN secret"
 )
 ICON_SIDE = 256
 MAX_DESCRIPTION = 256

@@ -16,7 +16,7 @@
       - NEXUS_API_KEY      (secret)   Nexus Mods API key
 
     Hexium configuration used by the workflow:
-      - HEXIUM_TCLI_AUTH_TOKEN (secret) Hexium/Thunderstore CLI auth token
+      - HEXIUM_API_TOKEN (secret) Hexium/Thunderstore CLI auth token
 
     Each value is read from the environment variable of the same name
     when it is already set; otherwise the script prompts for it.
@@ -148,12 +148,12 @@ function Get-DotEnvValue {
 
 if ($Platform -eq "hexium") {
     $WorkflowFile = Join-Path $RepoRoot ".github\workflows\upload-hexium.yml"
-    $HexiumToken = $env:HEXIUM_TCLI_AUTH_TOKEN
+    $HexiumToken = $env:HEXIUM_API_TOKEN
     if (-not $HexiumToken) {
-        $HexiumToken = Get-DotEnvValue -Key "HEXIUM_TCLI_AUTH_TOKEN"
+        $HexiumToken = Get-DotEnvValue -Key "HEXIUM_API_TOKEN"
     }
     if (-not $HexiumToken) {
-        $HexiumToken = Read-Host "Enter HEXIUM_TCLI_AUTH_TOKEN (or leave empty)"
+        $HexiumToken = Read-Host "Enter HEXIUM_API_TOKEN (or leave empty)"
     }
 }
 else {
@@ -201,7 +201,7 @@ if ($DryRun) {
 }
 if ($Platform -eq "hexium") {
     if ($HexiumToken) {
-        $ActArgs += @("--secret", "HEXIUM_TCLI_AUTH_TOKEN=$HexiumToken")
+        $ActArgs += @("--secret", "HEXIUM_API_TOKEN=$HexiumToken")
     }
 }
 else {
@@ -223,7 +223,7 @@ if ($env:GITHUB_TOKEN) {
 # Display the command with the secret values masked
 $DisplayArgs = $ActArgs | ForEach-Object {
     if ($_ -like "NEXUS_API_KEY=*") { "NEXUS_API_KEY=***" }
-    elseif ($_ -like "HEXIUM_TCLI_AUTH_TOKEN=*") { "HEXIUM_TCLI_AUTH_TOKEN=***" }
+    elseif ($_ -like "HEXIUM_API_TOKEN=*") { "HEXIUM_API_TOKEN=***" }
     elseif ($_ -like "GITHUB_TOKEN=*") { "GITHUB_TOKEN=***" }
     else { $_ }
 }

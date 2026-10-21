@@ -1,7 +1,7 @@
 # Discovers the current user / teams (namespace) on Hexium using the .env token.
 $ErrorActionPreference = 'Stop'
-$line = Get-Content .env | Where-Object { $_ -match '^HEXIUM_TCLI_AUTH_TOKEN\s*=' } | Select-Object -First 1
-$token = ($line -replace '^HEXIUM_TCLI_AUTH_TOKEN\s*=\s*', '').Trim()
+$line = Get-Content .env | Where-Object { $_ -match '^HEXIUM_API_TOKEN\s*=' } | Select-Object -First 1
+$token = ($line -replace '^HEXIUM_API_TOKEN\s*=\s*', '').Trim()
 if (-not $token) { Write-Host 'Token missing'; exit 1 }
 
 $urls = 'https://hexium.gg/api/current-user/',
