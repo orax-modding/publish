@@ -28,6 +28,13 @@ on:
         description: "Ref of orax-modding/publish carrying publish-hexium.py (keep equal to the calling ref)"
         type: string
         default: "v0.1"
+    secrets:
+      # Declared explicitly on purpose: 'secrets: inherit' only propagates
+      # between workflows of the same organization, while every consumer runs
+      # in its own organization. Callers must pass this secret by name.
+      HEXIUM_API_TOKEN:
+        description: "Hexium API token (team settings -> 'create a new API token')"
+        required: true
 
 permissions:
   contents: read

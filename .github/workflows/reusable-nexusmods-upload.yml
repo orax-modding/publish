@@ -32,6 +32,13 @@ on:
         description: "Create/update the mod version on every release"
         type: boolean
         default: true
+    secrets:
+      # Declared explicitly on purpose: 'secrets: inherit' only propagates
+      # between workflows of the same organization, while every consumer runs
+      # in its own organization. Callers must pass this secret by name.
+      NEXUSMODS_API_KEY:
+        description: "Nexus Mods API key"
+        required: true
 
 permissions:
   contents: read
