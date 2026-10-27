@@ -83,12 +83,17 @@ jobs:
             echo "CHANGELOG_EOF"
           } >> "$GITHUB_OUTPUT"
 
+      # The tag carries the conventional "v" prefix; Nexus displays the version string as-is.
+      - name: Derive the version from the tag
+        id: meta
+        run: echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+
       - uses: Nexus-Mods/upload-action@v1.0.0-beta.11
         with:
           api_key: ${{ secrets.NEXUSMODS_API_KEY }}
           file_id: ${{ inputs.file_id }}
           filename: dist/${{ inputs.asset || format('{0}.zip', github.event.repository.name) }}
-          version: ${{ inputs.tag || github.event.release.tag_name }}
+          version: ${{ steps.meta.outputs.version }}
           mod_id: ${{ inputs.mod_id }}
           display_name: ${{ inputs.display_name || format('{0}.zip', github.event.repository.name) }}
           update_mod_version: ${{ inputs.update_mod_version }}
