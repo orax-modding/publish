@@ -23,9 +23,9 @@ its fixes are fetched from here at the version you pin. The templates are in
 
 ---
 
-## 1. Publishing to Hexium from another repo
+## Publishing to Hexium from another repo
 
-### 1.1 The file to create — `.github/workflows/upload-hexium.yml`
+### The file to create — `.github/workflows/upload-hexium.yml`
 
 ```yaml
 name: Upload to Hexium.gg
@@ -57,7 +57,7 @@ jobs:
             HEXIUM_API_TOKEN: ${{ secrets.HEXIUM_API_TOKEN }}
 ```
 
-### 1.2 The `hexium.toml` file to create at the repo root
+### The `hexium.toml` file to create at the repo root
 
 The script reads it **from the calling repo** (namespace, communities, categories):
 
@@ -79,9 +79,9 @@ above.
 
 ---
 
-## 2. Publishing to Nexus Mods from another repo
+## Publishing to Nexus Mods from another repo
 
-### 2.1 The file to create — `.github/workflows/upload-nexusmods.yml`
+### The file to create — `.github/workflows/upload-nexusmods.yml`
 
 ```yaml
 name: Upload to Nexus Mods
@@ -104,7 +104,9 @@ jobs:
         uses: orax-modding/publish/.github/workflows/reusable-nexusmods-upload.yml@v0.1
         with:
             # workflow_dispatch input when run manually, release tag otherwise.
-            tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+            tag:
+                ${{ github.event_name == 'workflow_dispatch' && inputs.tag ||
+                github.event.release.tag_name }}
             mod_id: ${{ vars.NEXUSMODS_MOD_ID }}
             file_id: ${{ vars.NEXUSMODS_FILE_ID }}
             # display_name: dist/my-mod # optional; defaults to dist/<repo-name>
@@ -112,7 +114,7 @@ jobs:
             NEXUSMODS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
 ```
 
-### 2.2 The variables to create in that repo
+### The variables to create in that repo
 
 _Settings → Secrets and variables → Actions → Repository_:
 
@@ -126,19 +128,19 @@ No script and no `hexium.toml` to copy for Nexus-only projects. The changelog se
 
 ---
 
-## 3. Secrets and variables: organization over repository
+## Secrets and variables: organization over repository
 
 `orax-modding` is an **organization**, so create them once under \*Settings → Secrets and variables
 → Actions → **Organization\***:
 
-| type     | key                      | scope                         |
-| -------- | ------------------------ | ----------------------------- |
-| secret   | `HEXIUM_API_TOKEN` | all repos (Hexium API token)  |
-| secret   | `NEXUSMODS_API_KEY`      | all repos                     |
-| variable | `HEXIUM_TEAM`            | all repos (same Hexium team)  |
+| type     | key                 | scope                        |
+| -------- | ------------------- | ---------------------------- |
+| secret   | `HEXIUM_API_TOKEN`  | all repos (Hexium API token) |
+| secret   | `NEXUSMODS_API_KEY` | all repos                    |
+| variable | `HEXIUM_TEAM`       | all repos (same Hexium team) |
 
-From the CLI: `gh secret set HEXIUM_API_TOKEN --org orax-modding` (needs the `admin:org`
-scope: `gh auth refresh -s admin:org`).
+From the CLI: `gh secret set HEXIUM_API_TOKEN --org orax-modding` (needs the `admin:org` scope:
+`gh auth refresh -s admin:org`).
 
 Precedence: **repository variable > organization variable**, so keep `NEXUSMODS_MOD_ID` /
 `NEXUSMODS_FILE_ID` at the repository level (every mod has its own) and the tokens at the
@@ -146,63 +148,28 @@ organization level.
 
 Callers must forward the secret **by name** (the `secrets:` block in both examples above).
 `secrets: inherit` only propagates secrets between workflows of the **same organization**, while
-each consumer lives in its own organization: GitHub would then silently deliver an empty secret
-and the upload fails with "no API token found".
+each consumer lives in its own organization: GitHub would then silently deliver an empty secret and
+the upload fails with "no API token found".
 
 ---
 
-## 4. Checklist for each new project
+## Checklist for each new project
 
 1. **Zip name**: `<repo-name>.zip` is expected by default → otherwise pass the `asset:` input.
-2. **Hexium**: `hexium.toml` (namespace, communities, categories) + the `HEXIUM_API_TOKEN`
-   secret available (organization).
+2. **Hexium**: `hexium.toml` (namespace, communities, categories) + the `HEXIUM_API_TOKEN` secret
+   available (organization).
 3. **Nexus**: `NEXUSMODS_MOD_ID` + `NEXUSMODS_FILE_ID` repository variables.
 4. **Default branch**: the caller file must live on it (otherwise `release` triggers never fire).
 5. **Permissions**: keep `permissions: contents: read` in the caller (the ceiling passed down to the
    master workflow, required by `gh release download`).
-6. **Manual run / dry run**: _Actions → Upload to Hexium.gg_ or _Upload to Nexus Mods_ →
-   _Run workflow_ with an existing tag (both callers expose that button). This is also the way
-   to retry a failed upload after fixing the configuration — no release to re-publish. The tag
-   must point at a published release carrying the asset.
+6. **Manual run / dry run**: _Actions → Upload to Hexium.gg_ or _Upload to Nexus Mods_ → _Run
+   workflow_ with an existing tag (both callers expose that button). This is also the way to retry a
+   failed upload after fixing the configuration — no release to re-publish. The tag must point at a
+   published release carrying the asset.
 
 ---
 
-## 5. Versions and updates
-
-- Tools versioning uses semver with **two tags per release**:
-
-    | tag      | role                                                                       |
-    | -------- | -------------------------------------------------------------------------- |
-    | `v0.1.0` | precise release: immutable, for audit and rollback                         |
-    | `v0.1`   | floating minor: what callers pin (`@v0.1`), moved onto the latest `v0.1.x` |
-
-- Callers pin **`@v0.1`** (or exactly `v0.1.0` during a staged migration); never use a floating ref
-  like `@master`.
-- To ship a change: create the precise tag (`v0.1.1`, or `v0.2.0` for a breaking change), move
-  `v0.1` onto it, then update `@v0.1` → `@v0.2` in every caller (`tools_ref` also defaults to
-  `v0.1`: the same version as the one being called).
-- **Two tag families share this repo — never mix them:**
-    - `v0.0.x` = dummy **package** versions: published as **GitHub Releases** carrying
-      `publish.zip`, and they trigger the upload workflows;
-    - tool tags (`v0.1.0`, `v0.1`) = workflow versions: **plain `git tag` only, never a GitHub
-      Release** — otherwise the `release` trigger fires and the run fails on the missing
-      `publish.zip` asset.
-- Recommended automatic tracking, `.github/dependabot.yml` in every repo:
-
-    ```yaml
-    version: 2
-    updates:
-        - package-ecosystem: github-actions
-          directory: /
-          schedule:
-              interval: weekly
-    ```
-
-    (Dependabot updates external `uses:` refs, reusable workflows included.)
-
----
-
-## 6. Limits to know
+## Limits to know
 
 - A job that calls a reusable workflow (`uses:`) **cannot** have its own `steps`/`runs-on`: if you
   need to chain other steps (changelog, release notes…), keep those steps in the calling repo and
