@@ -25,7 +25,7 @@ on:
         type: string
         required: true
       display_name:
-        description: "Name displayed on Nexus; empty = dist/<repo-name>"
+        description: "Name displayed on Nexus; empty = <repo-name>.zip"
         type: string
         default: ""
       update_mod_version:
@@ -90,6 +90,6 @@ jobs:
           filename: dist/${{ inputs.asset || format('{0}.zip', github.event.repository.name) }}
           version: ${{ inputs.tag || github.event.release.tag_name }}
           mod_id: ${{ inputs.mod_id }}
-          display_name: ${{ inputs.display_name || format('dist/{0}', github.event.repository.name) }}
+          display_name: ${{ inputs.display_name || format('{0}.zip', github.event.repository.name) }}
           update_mod_version: ${{ inputs.update_mod_version }}
           changelog: ${{ steps.changelog.outputs.changelog }}

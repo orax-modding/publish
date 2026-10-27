@@ -109,7 +109,7 @@ jobs:
                 github.event.release.tag_name }}
             mod_id: ${{ vars.NEXUSMODS_MOD_ID }}
             file_id: ${{ vars.NEXUSMODS_FILE_ID }}
-            # display_name: dist/my-mod # optional; defaults to dist/<repo-name>
+            # display_name: my-mod.zip # optional; defaults to <repo-name>.zip
         secrets:
             NEXUSMODS_API_KEY: ${{ secrets.NEXUSMODS_API_KEY }}
 ```
