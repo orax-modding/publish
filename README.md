@@ -193,6 +193,10 @@ valheim = ["Mods"]
 Categories are checked online before every upload, so a name that does not exist on Thunderstore
 stops the run with the list of the valid ones.
 
+Two inputs help on a first run: `dry_run: true` uploads the zip and then aborts instead of
+submitting — the token and the whole upload path are exercised, nothing is published — and `asset:`
+names a release asset other than `<repo-name>.zip`.
+
 The token is created on Thunderstore under _account settings → API tokens_. The `config:` input
 defaults to `thunderstore.toml`, so the file must exist on every project keeping that default; pass
 `config: ''` together with `communities:` for a project that keeps no config file at all.

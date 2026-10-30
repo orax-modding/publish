@@ -33,6 +33,10 @@ on:
         description: "Store base URL"
         type: string
         default: "https://thunderstore.io"
+      dry_run:
+        description: "Upload the zip, then abort instead of submitting (validates the token, publishes nothing)"
+        type: boolean
+        default: false
       tools_ref:
         description: "Ref of orax-modding/publish carrying publish-hexium.py (keep equal to the calling ref)"
         type: string
@@ -83,8 +87,10 @@ jobs:
         env:
           CONFIG: ${{ inputs.config }}
           COMMUNITIES: ${{ inputs.communities }}
+          DRY_RUN: ${{ inputs.dry_run }}
         run: |
           args=(--repository "$REPOSITORY")
           [ -z "$CONFIG" ] || args+=(--config "$CONFIG")
           [ -z "$COMMUNITIES" ] || args+=(--communities "$COMMUNITIES")
+          [ "$DRY_RUN" != "true" ] || args+=(--dry-run)
           python3 .publish-tools/publish-hexium.py "dist/$ASSET" "${args[@]}"
