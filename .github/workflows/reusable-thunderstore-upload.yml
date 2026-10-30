@@ -1,0 +1,90 @@
+# Reusable workflow: publish a release to Thunderstore.io.
+#
+# Thunderstore implements the same experimental submission API as Hexium, so this runs
+# the very same publish-hexium.py as reusable-hexium-upload.yml: only the store-specific
+# values differ (repository URL, config file, token secret). Other repos only call this
+# file, see README.md for the caller template to copy.
+name: Thunderstore upload (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      asset:
+        description: "Zip to publish; empty = <repo-name>.zip"
+        type: string
+        default: ""
+      tag:
+        description: "Tag to publish; empty = the release that triggered the call"
+        type: string
+        default: ""
+      team:
+        description: "Thunderstore namespace (author_name); empty = [package] namespace from the config"
+        type: string
+        default: ""
+      communities:
+        description: "Comma-separated communities; empty = [publish] communities from the config"
+        type: string
+        default: ""
+      config:
+        description: "Config read by publish-hexium.py; defaults to thunderstore.toml (pass '' for none)"
+        type: string
+        default: "thunderstore.toml"
+      repository:
+        description: "Store base URL"
+        type: string
+        default: "https://thunderstore.io"
+      tools_ref:
+        description: "Ref of orax-modding/publish carrying publish-hexium.py (keep equal to the calling ref)"
+        type: string
+        default: "v0.1"
+    secrets:
+      # Declared explicitly on purpose: 'secrets: inherit' only propagates
+      # between workflows of the same organization, while every consumer runs
+      # in its own organization. Callers must pass this secret by name.
+      THUNDERSTORE_API_TOKEN:
+        description: "Thunderstore API token (account settings -> API tokens)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Forwarded from the caller via secrets: Thunderstore API token
+      # (account settings -> API tokens).
+      THUNDERSTORE_API_TOKEN: ${{ secrets.THUNDERSTORE_API_TOKEN }}
+      THUNDERSTORE_TEAM: ${{ inputs.team }}
+      REPOSITORY: ${{ inputs.repository }}
+      TAG: ${{ inputs.tag || github.event.release.tag_name }}
+      ASSET: ${{ inputs.asset || format('{0}.zip', github.event.repository.name) }}
+
+    steps:
+      - name: Checkout the calling project
+        uses: actions/checkout@v7.0.1
+
+      - name: Checkout orax-modding/publish (publish-hexium.py)
+        uses: actions/checkout@v7.0.1
+        with:
+          repository: orax-modding/publish
+          ref: ${{ inputs.tools_ref }}
+          path: .publish-tools
+
+      - name: Download release asset
+        run: |
+          gh release download "$TAG" --pattern "$ASSET" --dir dist
+          ls dist/
+
+      # Python 3 is preinstalled on the runner; the script is stdlib-only and
+      # reads thunderstore.toml from the calling project.
+      - name: Publish to Thunderstore
+        env:
+          CONFIG: ${{ inputs.config }}
+          COMMUNITIES: ${{ inputs.communities }}
+        run: |
+          args=(--repository "$REPOSITORY")
+          [ -z "$CONFIG" ] || args+=(--config "$CONFIG")
+          [ -z "$COMMUNITIES" ] || args+=(--communities "$COMMUNITIES")
+          python3 .publish-tools/publish-hexium.py "dist/$ASSET" "${args[@]}"
