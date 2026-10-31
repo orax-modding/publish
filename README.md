@@ -1,17 +1,17 @@
 # publish
 
-Reusable GitHub workflows and [`publish-hexium.py`](publish-hexium.py) to publish releases to
+Reusable GitHub workflows and [`publish-hexium-thunderstore.py`](publish-hexium-thunderstore.py) to publish releases to
 **Hexium.gg**, **Thunderstore.io** and **Nexus Mods** from any repository of the `orax-modding`
 organization.
 
 This repo is the **single source of truth** for three publishing pipelines:
 
-| file (here)                                          | role                                                                     |
-| ---------------------------------------------------- | ------------------------------------------------------------------------ |
-| `.github/workflows/reusable-hexium-upload.yml`       | **reusable** workflow: the whole Hexium pipeline + `publish-hexium.py`   |
-| `.github/workflows/reusable-thunderstore-upload.yml` | **reusable** workflow: the Thunderstore pipeline (same script)           |
-| `.github/workflows/reusable-nexusmods-upload.yml`    | **reusable** workflow: the whole Nexus Mods pipeline                     |
-| `publish-hexium.py`                                  | the script (always executed from _this_ repo, never copied)              |
+| file (here)                                          | role                                                                              |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `.github/workflows/reusable-hexium-upload.yml`       | **reusable** workflow: the whole Hexium pipeline + `publish-hexium-thunderstore.py` |
+| `.github/workflows/reusable-thunderstore-upload.yml` | **reusable** workflow: the Thunderstore pipeline (same script)                    |
+| `.github/workflows/reusable-nexusmods-upload.yml`    | **reusable** workflow: the whole Nexus Mods pipeline                              |
+| `publish-hexium-thunderstore.py`                     | the script (always executed from _this_ repo, never copied)                       |
 | `.github/workflows/upload-hexium.yml`                | local caller (this repo)                                                 |
 | `.github/workflows/upload-thunderstore.yml`          | local caller (this repo)                                                 |
 | `.github/workflows/upload-nexusmods.yml`             | local caller (this repo)                                                 |
@@ -70,7 +70,7 @@ The script reads it **from the calling repo** (namespace, communities, categorie
 namespace = "my-namespace"        # Hexium author/team (author_name)
 
 [publish]
-repository = "https://hexium.gg"  # read by publish-hexium.py (and by tcli)
+repository = "https://hexium.gg"  # read by publish-hexium-thunderstore.py (and by tcli)
 communities = ["valheim"]
 
 [publish.categories]
@@ -135,7 +135,7 @@ No script and no `hexium.toml` to copy for Nexus-only projects. The changelog se
 ## 3. Publishing to Thunderstore from another repo
 
 Thunderstore implements the same experimental submission API as Hexium, so this pipeline runs the
-**very same `publish-hexium.py`**: only the URL, the config file and the token secret differ.
+**very same `publish-hexium-thunderstore.py`**: only the URL, the config file and the token secret differ.
 
 ### The file to create — `.github/workflows/upload-thunderstore.yml`
 

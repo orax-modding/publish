@@ -1,6 +1,6 @@
 # Reusable workflow: publish a release to Hexium.gg.
 #
-# Single source of the logic (publish-hexium.py included, fetched from
+# Single source of the logic (publish-hexium-thunderstore.py included, fetched from
 # orax-modding/publish): other repos only call this file,
 # see README.md for the ~10-line caller template to copy.
 name: Hexium upload (reusable)
@@ -21,11 +21,11 @@ on:
         type: string
         default: ""
       config:
-        description: "Config read by publish-hexium.py; empty = hexium.toml when present"
+        description: "Config read by publish-hexium-thunderstore.py; empty = hexium.toml when present"
         type: string
         default: ""
       tools_ref:
-        description: "Ref of orax-modding/publish carrying publish-hexium.py (keep equal to the calling ref)"
+        description: "Ref of orax-modding/publish carrying publish-hexium-thunderstore.py (keep equal to the calling ref)"
         type: string
         default: "v0.1"
     secrets:
@@ -55,7 +55,7 @@ jobs:
       - name: Checkout the calling project
         uses: actions/checkout@v7.0.1
 
-      - name: Checkout orax-modding/publish (publish-hexium.py)
+      - name: Checkout orax-modding/publish (publish-hexium-thunderstore.py)
         uses: actions/checkout@v7.0.1
         with:
           repository: orax-modding/publish
@@ -75,4 +75,4 @@ jobs:
         run: |
           args=()
           [ -z "$CONFIG" ] || args+=(--config "$CONFIG")
-          python3 .publish-tools/publish-hexium.py "dist/$ASSET" "${args[@]}"
+          python3 .publish-tools/publish-hexium-thunderstore.py "dist/$ASSET" "${args[@]}"

@@ -16,11 +16,11 @@ per-community ones, `author_name` is the team/namespace the token belongs to.
 Standard library only (Python 3.11+ for tomllib), so it runs on a CI box untouched.
 
 Usage:
-    HEXIUM_API_TOKEN=... python publish-hexium.py dist/publish.zip
-    python publish-hexium.py dist/publish.zip --team YOUR_TEAM --categories "Open Source,Valheim 1.0"
-    THUNDERSTORE_API_TOKEN=... python publish-hexium.py dist/publish.zip --repository https://thunderstore.io
-    python publish-hexium.py dist/publish.zip --check-only   # no token, no upload
-    python publish-hexium.py dist/publish.zip --dry-run      # full upload, then abort
+    HEXIUM_API_TOKEN=... python publish-hexium-thunderstore.py dist/publish.zip
+    python publish-hexium-thunderstore.py dist/publish.zip --team YOUR_TEAM --categories "Open Source,Valheim 1.0"
+    THUNDERSTORE_API_TOKEN=... python publish-hexium-thunderstore.py dist/publish.zip --repository https://thunderstore.io
+    python publish-hexium-thunderstore.py dist/publish.zip --check-only   # no token, no upload
+    python publish-hexium-thunderstore.py dist/publish.zip --dry-run      # full upload, then abort
 
 The store is the URL: --repository (or [publish] repository in the config) decides which
 token, which team variable and which config file apply, so the credential of the other
@@ -173,7 +173,7 @@ def http_request(
 
     request_headers = {
         "Accept": "application/json",
-        "User-Agent": "publish-hexium/1.0",
+        "User-Agent": "publish-hexium-thunderstore/1.0",
     }
     if content_type:
         request_headers["Content-Type"] = content_type

@@ -3,11 +3,11 @@ schemaVersion = "0.0.1"
 
 [general]
 # Documentation only: tcli 0.2.x never reads this key, it takes the URL from
-# [publish].repository below. publish-hexium.py accepts either spelling.
+# [publish].repository below. publish-hexium-thunderstore.py accepts either spelling.
 repository = "https://hexium.gg"
 
 [package]
-# Namespace (team) the packages are published under; publish-hexium.py uses it as
+# Namespace (team) the packages are published under; publish-hexium-thunderstore.py uses it as
 # author_name unless --team or HEXIUM_TEAM says otherwise.
 namespace = "orax"
 

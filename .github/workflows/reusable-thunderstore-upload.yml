@@ -1,7 +1,7 @@
 # Reusable workflow: publish a release to Thunderstore.io.
 #
 # Thunderstore implements the same experimental submission API as Hexium, so this runs
-# the very same publish-hexium.py as reusable-hexium-upload.yml: only the store-specific
+# the very same publish-hexium-thunderstore.py as reusable-hexium-upload.yml: only the store-specific
 # values differ (repository URL, config file, token secret). Other repos only call this
 # file, see README.md for the caller template to copy.
 name: Thunderstore upload (reusable)
@@ -26,7 +26,7 @@ on:
         type: string
         default: ""
       config:
-        description: "Config read by publish-hexium.py; defaults to thunderstore.toml (pass '' for none)"
+        description: "Config read by publish-hexium-thunderstore.py; defaults to thunderstore.toml (pass '' for none)"
         type: string
         default: "thunderstore.toml"
       repository:
@@ -38,7 +38,7 @@ on:
         type: boolean
         default: false
       tools_ref:
-        description: "Ref of orax-modding/publish carrying publish-hexium.py (keep equal to the calling ref)"
+        description: "Ref of orax-modding/publish carrying publish-hexium-thunderstore.py (keep equal to the calling ref)"
         type: string
         default: "v0.1"
     secrets:
@@ -74,7 +74,7 @@ jobs:
       - name: Checkout the calling project
         uses: actions/checkout@v7.0.1
 
-      - name: Checkout orax-modding/publish (publish-hexium.py)
+      - name: Checkout orax-modding/publish (publish-hexium-thunderstore.py)
         uses: actions/checkout@v7.0.1
         with:
           repository: orax-modding/publish
@@ -98,4 +98,4 @@ jobs:
           [ -z "$CONFIG" ] || args+=(--config "$CONFIG")
           [ -z "$COMMUNITIES" ] || args+=(--communities "$COMMUNITIES")
           [ "$DRY_RUN" != "true" ] || args+=(--dry-run)
-          python3 .publish-tools/publish-hexium.py "dist/$ASSET" "${args[@]}"
+          python3 .publish-tools/publish-hexium-thunderstore.py "dist/$ASSET" "${args[@]}"

@@ -2,7 +2,7 @@ name: Upload to Thunderstore.io
 
 # Thin caller: every bit of logic lives in reusable-thunderstore-upload.yml (the
 # reusable workflow in orax-modding/publish), fetched at the pinned ref together
-# with publish-hexium.py. Nothing else to copy from that repo; the project only
+# with publish-hexium-thunderstore.py. Nothing else to copy from that repo; the project only
 # carries thunderstore.toml beside this file.
 # Template: orax-modding/publish README.md section 3.
 on:
