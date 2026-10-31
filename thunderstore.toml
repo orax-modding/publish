@@ -20,4 +20,4 @@ communities = ["valheim"]
 
 [publish.categories]
 # https://thunderstore.io/api/experimental/community/valheim/category/
-valheim = ["Mods"]
+valheim = []
