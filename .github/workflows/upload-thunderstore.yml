@@ -18,6 +18,10 @@ on:
         description: "Zip to publish; empty = <repo-name>.zip"
         type: string
         default: ""
+      repository:
+        description: "Store base URL (e.g. https://thunderstore.dev for the test site)"
+        type: string
+        default: "https://thunderstore.io"
       dry_run:
         description: "Upload then abort instead of publishing (validates the token)"
         type: boolean
@@ -33,6 +37,7 @@ jobs:
       # workflow_dispatch input when run manually, release tag otherwise.
       tag: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
       asset: ${{ github.event_name == 'workflow_dispatch' && inputs.asset || '' }}
+      repository: ${{ github.event_name == 'workflow_dispatch' && inputs.repository || 'https://thunderstore.io' }}
       # Nothing is published while the checkbox is ticked.
       dry_run: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
       # Thunderstore namespace; empty = [package] namespace from thunderstore.toml.
