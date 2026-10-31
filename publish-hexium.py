@@ -67,8 +67,12 @@ TOKEN_HINTS = {
         "create a fresh token on Thunderstore (sign in -> account settings -> API tokens -> "
         "generate a new token) and store it in the THUNDERSTORE_API_TOKEN secret"
     ),
+    "thunderstore_dev": (
+        "create a fresh token on Thunderstore.dev (sign in -> account settings -> API tokens -> "
+        "generate a new token) and store it in the THUNDERSTORE_DEV_API_TOKEN secret"
+    ),
 }
-STORE_LABELS = {"hexium": "Hexium", "thunderstore": "Thunderstore"}
+STORE_LABELS = {"hexium": "Hexium", "thunderstore": "Thunderstore", "thunderstore_dev": "Thunderstore.dev"}
 ICON_SIDE = 256
 MAX_DESCRIPTION = 256
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
@@ -89,12 +93,16 @@ def log(message: str = "") -> None:
 
 
 def store_key(repository: str) -> str:
-    """Which store a URL talks to: 'thunderstore', otherwise 'hexium'.
+    """Which store a URL talks to: 'thunderstore_dev', 'thunderstore', or 'hexium'.
 
+    thunderstore.dev is Thunderstore's test instance and has its own token namespace.
     Self-hosted Hexium instances and every other Thunderstore-compatible host therefore
     keep the Hexium credential names.
     """
-    return "thunderstore" if "thunderstore" in (repository or "").lower() else "hexium"
+    url = (repository or "").lower()
+    if "thunderstore.dev" in url:
+        return "thunderstore_dev"
+    return "thunderstore" if "thunderstore" in url else "hexium"
 
 
 def store_env_names(repository: str) -> tuple[str, str]:
@@ -103,7 +111,10 @@ def store_env_names(repository: str) -> tuple[str, str]:
     Only the names of the store are read, so a credential belonging to the other store is
     never reused — that mistake fails with an opaque 401 instead of a clear message.
     """
-    if store_key(repository) == "thunderstore":
+    key = store_key(repository)
+    if key == "thunderstore_dev":
+        return "THUNDERSTORE_DEV_API_TOKEN", "THUNDERSTORE_DEV_TEAM"
+    if key == "thunderstore":
         return "THUNDERSTORE_API_TOKEN", "THUNDERSTORE_TEAM"
     return "HEXIUM_API_TOKEN", "HEXIUM_TEAM"
 

@@ -47,3 +47,4 @@ jobs:
       # communities: valheim        # optional; defaults to [publish] communities
     secrets:
       THUNDERSTORE_API_TOKEN: ${{ secrets.THUNDERSTORE_API_TOKEN }}
+      THUNDERSTORE_DEV_API_TOKEN: ${{ secrets.THUNDERSTORE_DEV_API_TOKEN }}

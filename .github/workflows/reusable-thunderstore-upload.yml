@@ -47,7 +47,10 @@ on:
       # in its own organization. Callers must pass this secret by name.
       THUNDERSTORE_API_TOKEN:
         description: "Thunderstore API token (account settings -> API tokens)"
-        required: true
+        required: false
+      THUNDERSTORE_DEV_API_TOKEN:
+        description: "Thunderstore.dev test instance API token (for repository=https://thunderstore.dev)"
+        required: false
 
 permissions:
   contents: read
@@ -58,8 +61,10 @@ jobs:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # Forwarded from the caller via secrets: Thunderstore API token
-      # (account settings -> API tokens).
+      # (account settings -> API tokens). The script picks the right one
+      # based on the repository URL.
       THUNDERSTORE_API_TOKEN: ${{ secrets.THUNDERSTORE_API_TOKEN }}
+      THUNDERSTORE_DEV_API_TOKEN: ${{ secrets.THUNDERSTORE_DEV_API_TOKEN }}
       THUNDERSTORE_TEAM: ${{ inputs.team }}
       REPOSITORY: ${{ inputs.repository }}
       TAG: ${{ inputs.tag || github.event.release.tag_name }}
